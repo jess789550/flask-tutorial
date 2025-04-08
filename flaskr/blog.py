@@ -76,6 +76,16 @@ def get_post(id, check_author=True):
 
     post['likes_count'] = like_count
     post['user_liked'] = user_liked
+
+     # Fetch comments for the post
+    comments = db.execute(
+        'SELECT c.id, c.body, c.created, u.username'
+        ' FROM comments c JOIN user u ON c.user_id = u.id'
+        ' WHERE c.post_id = ? ORDER BY c.created DESC',
+        (id,)
+    ).fetchall()
+
+    post['comments'] = comments
     
     return post
 
@@ -152,5 +162,30 @@ def like_post(id):
         )
         db.commit()
         flash('You liked this post!', 'success')
+
+    return redirect(url_for('blog.post_details', id=id))
+
+
+@bp.route('/<int:id>/comment', methods=('POST',))
+@login_required
+def comment(id):
+    post = get_post(id, check_author=False)  # Fetch the post without author check
+
+    body = request.form['body']
+    error = None
+
+    if not body:
+        error = 'Comment cannot be empty.'
+
+    if error is not None:
+        flash(error)
+    else:
+        db = get_db()
+        db.execute(
+            'INSERT INTO comments (post_id, user_id, body) VALUES (?, ?, ?)',
+            (id, g.user['id'], body)
+        )
+        db.commit()
+        flash('Your comment has been posted!', 'success')
 
     return redirect(url_for('blog.post_details', id=id))

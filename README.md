@@ -18,6 +18,10 @@ flask --app flaskr init-db
 ```
 flask --app flaskr run --debug
 ```
+or 
+```
+flask run
+```
 
 ## Link for app
 http://127.0.0.1:5000/auth/login/
@@ -44,6 +48,14 @@ pip install waitress
 waitress-serve --call 'flaskr:create_app'
 ```
 
+## Database migration
+```
+export FLASK_APP=flaskr
+flask db init      # Initializes the migrations folder
+flask db migrate   # Generates the migration script
+flask db upgrade   # Applies the migration to the database
+```
+
 ---
 
 # Notes 
@@ -54,3 +66,4 @@ waitress-serve --call 'flaskr:create_app'
 - Flask automatically adds a static view that takes a path relative to the flaskr/static directory and serves it.
 - The application context keeps track of the application-level data during a request, CLI command, or other activity. Rather than passing the application around to each function, the current_app and g proxies are accessed instead.
 - The g name stands for “global”, but that is referring to the data being global within a context. The data on g is lost after the context ends, and it is not an appropriate place to store data between requests. Use the session or a database to store data across requests.
+- To migrate database have a look at Flask-Migrate https://flask-migrate.readthedocs.io/en/latest/
