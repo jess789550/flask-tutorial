@@ -1,3 +1,5 @@
+*** WARNING: This tutorial was written in 2010 and is outdated - cannot support Flask-migration nor Flask-SQLalchemy***
+
 # Flask Tutorial
 https://flask.palletsprojects.com/en/stable/tutorial/
 
