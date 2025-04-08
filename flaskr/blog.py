@@ -98,3 +98,9 @@ def delete(id):
     db.execute('DELETE FROM post WHERE id = ?', (id,))
     db.commit()
     return redirect(url_for('blog.index'))
+
+
+@bp.route('/<int:id>')
+def post_details(id):
+    post = get_post(id, check_author=False)  # You can set check_author=False for details page
+    return render_template('blog/post_details.html', post=post)
