@@ -52,3 +52,5 @@ waitress-serve --call 'flaskr:create_app'
 - A Blueprint @bp.route() is a way to organise a group of related views and other code.
 - Templates are files that contain static data as well as placeholders for dynamic data. A template is rendered with specific data to produce a final document. Flask uses the Jinja template library to render templates.
 - Flask automatically adds a static view that takes a path relative to the flaskr/static directory and serves it.
+- The application context keeps track of the application-level data during a request, CLI command, or other activity. Rather than passing the application around to each function, the current_app and g proxies are accessed instead.
+- The g name stands for “global”, but that is referring to the data being global within a context. The data on g is lost after the context ends, and it is not an appropriate place to store data between requests. Use the session or a database to store data across requests.

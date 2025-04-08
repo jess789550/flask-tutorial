@@ -46,7 +46,8 @@ def create():
 
 
 def get_post(id, check_author=True):
-    post = get_db().execute(
+    db = get_db()
+    post = db.execute(
         'SELECT p.id, title, body, created, author_id, username'
         ' FROM post p JOIN user u ON p.author_id = u.id'
         ' WHERE p.id = ?',
@@ -58,7 +59,24 @@ def get_post(id, check_author=True):
 
     if check_author and post['author_id'] != g.user['id']:
         abort(403)
+    
+    post = dict(post) 
 
+    # Fetch like count for the post
+    like_count = db.execute(
+        'SELECT COUNT(*) FROM post_likes WHERE post_id = ?',
+        (id,)
+    ).fetchone()[0]
+
+    # Check if the current user has liked this post
+    user_liked = db.execute(
+        'SELECT 1 FROM post_likes WHERE post_id = ? AND user_id = ?',
+        (id, g.user['id'])
+    ).fetchone() is not None
+
+    post['likes_count'] = like_count
+    post['user_liked'] = user_liked
+    
     return post
 
 
@@ -104,3 +122,35 @@ def delete(id):
 def post_details(id):
     post = get_post(id, check_author=False)  # You can set check_author=False for details page
     return render_template('blog/post_details.html', post=post)
+
+
+@bp.route('/<int:id>/like', methods=('POST',))
+@login_required
+def like_post(id):
+    db = get_db()
+    post = get_post(id, check_author=False)  # Get the post, no need to check author for liking
+
+    # Check if the user has already liked the post
+    like = db.execute(
+        'SELECT 1 FROM post_likes WHERE post_id = ? AND user_id = ?',
+        (id, g.user['id'])
+    ).fetchone()
+
+    if like:
+        # User already liked, so we remove the like (unlike)
+        db.execute(
+            'DELETE FROM post_likes WHERE post_id = ? AND user_id = ?',
+            (id, g.user['id'])
+        )
+        db.commit()
+        flash('You unliked this post.', 'info')
+    else:
+        # User has not liked the post yet, so we add the like
+        db.execute(
+            'INSERT INTO post_likes (post_id, user_id) VALUES (?, ?)',
+            (id, g.user['id'])
+        )
+        db.commit()
+        flash('You liked this post!', 'success')
+
+    return redirect(url_for('blog.post_details', id=id))
