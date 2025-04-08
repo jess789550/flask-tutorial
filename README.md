@@ -4,6 +4,16 @@ https://flask.palletsprojects.com/en/stable/tutorial/
 ## Answers
 https://github.com/pallets/flask/tree/main/examples/tutorial
 
+## How to install
+```
+pip install -e .
+```
+
+## Initialise database
+```
+flask --app flaskr init-db
+```
+
 ## How to run app
 ```
 flask --app flaskr run --debug
@@ -12,9 +22,26 @@ flask --app flaskr run --debug
 ## Link for app
 http://127.0.0.1:5000/auth/login/
 
-## Initialise database
+## Run unit tests, assess coverage, and generate report
 ```
-flask --app flaskr init-db
+pytest -v
+coverage run -m pytest
+coverage html
+```
+
+## Deployment
+```
+# Build and Install
+pip install build
+python -m build --wheel
+pip install flaskr-1.0.0-py3-none-any.whl
+
+# Configure secret key
+python -c 'import secrets; print(secrets.token_hex())'
+
+# Run with a production server
+pip install waitress
+waitress-serve --call 'flaskr:create_app'
 ```
 
 ---
